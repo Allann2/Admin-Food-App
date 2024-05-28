@@ -50,16 +50,36 @@ class loginActivity : AppCompatActivity() {
         }
     }
 
-    private fun signInOrCreateAccount(email: String, password: String) {
-        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val admin = auth.currentUser
-                updateUi(admin)
-            } else {
-                createAccount(email, password)
+//    private fun signInOrCreateAccount(email: String, password: String) {
+//        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+//            if (task.isSuccessful) {
+//                val admin = auth.currentUser
+//                updateUi(admin)
+//            } else {
+//                createAccount(email, password)
+//            }
+//        }
+//    }
+private fun signInOrCreateAccount(email: String, password: String) {
+    auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+            val userId = auth.currentUser?.uid
+            userId?.let {
+                database.child("admin").child(it).get().addOnSuccessListener { snapshot ->
+                    val admin = snapshot.getValue(UserModel::class.java)
+                    if (admin?.role == "admin") {
+                        updateUi(auth.currentUser)
+                    } else {
+                        auth.signOut()
+                        Toast.makeText(this, "Access Denied", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
+        } else {
+            createAccount(email, password)
         }
     }
+}
 
     private fun createAccount(email: String, password: String) {
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
@@ -92,7 +112,7 @@ class loginActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateUi(user: FirebaseUser?) {
+    private fun updateUi(admin: FirebaseUser?) {
         startActivity(Intent(this, MainActivity::class.java))
         finish()
     }

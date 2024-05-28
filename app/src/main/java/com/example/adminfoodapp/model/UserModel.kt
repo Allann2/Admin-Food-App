@@ -5,4 +5,5 @@ data class UserModel(
     val loginRestaurantName: String? = null,
     val email: String? = null,
     val password: String? = null,
+    val role: String? = "admin" // Add role attribute
 )

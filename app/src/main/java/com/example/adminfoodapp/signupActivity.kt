@@ -75,17 +75,39 @@ class signupActivity : AppCompatActivity() {
     }
 
     //save data into database
+//    private fun saveUserData() {
+//        //get text from edittext
+//        userName = binding.loginName.text.toString().trim()
+//        restaurantName = binding.loginRestoname.text.toString().trim()
+//        email = binding.email.text.toString().trim()
+//        password = binding.password.text.toString().trim()
+//        val admin = UserModel(userName, restaurantName, email, password)
+//        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+//
+//        //save user data into firebase
+//        database.child("admin").child(userId).setValue(admin)
+//
+//    }
     private fun saveUserData() {
-        //get text from edittext
-        userName = binding.loginName.text.toString().trim()
-        restaurantName = binding.loginRestoname.text.toString().trim()
         email = binding.email.text.toString().trim()
         password = binding.password.text.toString().trim()
-        val admin = UserModel(userName, restaurantName, email, password)
-        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+        val userId = auth.currentUser?.uid
+        val admin = UserModel(
+            loginName = binding.loginName.text.toString().trim(),
+            loginRestaurantName = binding.loginRestoname.text.toString().trim(),
+            email = email,
+            password = password,
+            role = "admin" // Set role as "admin"
+        )
 
-        //save user data into firebase
-        database.child("admin").child(userId).setValue(admin)
-
+        userId?.let {
+            database.child("admin").child(it).setValue(admin)
+                .addOnSuccessListener {
+                    Log.d("Database", "Admin data saved successfully")
+                }
+                .addOnFailureListener { e ->
+                    Log.d("Database", "Error saving admin data: ${e.message}")
+                }
+        }
     }
 }
